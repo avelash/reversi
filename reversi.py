@@ -1,5 +1,6 @@
 from reversi.board import Board
 from reversi.constants import WHITE
+import argparse
 
 
 def methodical(n):
@@ -46,7 +47,6 @@ def display_all_actions(num):
     next_moves = board.next_moves()
     for move in next_moves:
         row, col = move
-        print(f"heuristic: {board.heuristic(row, col)}")
         temp_board = board.copy()
         temp_board.make_move(row, col)
         print(f"{to_play} moved, Action: {move}")
@@ -57,17 +57,17 @@ def display_all_actions(num):
 
 
 def main():
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--displayAllActions", type=int,
-    #                     help= "display all actions from a position with num disks")
-    # parser.add_argument("--methodical", type=int,
-    #                     help="run a methodical game displaying the first n states")
-    # args = parser.parse_args()
-    # if args.displayAllActions:
-    #     display_all_actions(args.displayAllActions)
-    # if args.methodical:
-    #     methodical(args.methodical)
-    display_all_actions(7)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--displayAllActions", type=int,
+                        help= "display all actions from a position with num disks")
+    parser.add_argument("--methodical", type=int,
+                        help="run a methodical game displaying the first n states")
+    args = parser.parse_args()
+    if args.displayAllActions:
+        display_all_actions(args.displayAllActions)
+    if args.methodical:
+        methodical(args.methodical)
+
 
 
 if __name__ == '__main__':
