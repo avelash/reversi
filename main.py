@@ -24,14 +24,21 @@ def main():
 
 
     while run:
-        # if board.turn == BLACK:
-        #     next_moves = board.next_moves()
-        #     if len(next_moves) == 0:
-        #         break
-        #     next_move = next_moves[0]
-        #     row, col = next_move
-        #     time.sleep(3)
-        #     board.make_move(row, col)
+        if board.turn == BLACK:
+            next_moves = board.next_moves()
+            if len(next_moves) == 0:
+                break
+            best_move = next_moves[0]
+            row, col = best_move
+            best_move_h = board.heuristic(row, col)
+            for move in next_moves:
+                row, col = move
+                if board.heuristic(row, col) > best_move_h:
+                    best_move = move
+                    best_move_h = board.heuristic(row,col)
+            row, col = best_move
+            time.sleep(3)
+            board.make_move(row, col)
 
         clock.tick(FPS)
         for event in pygame.event.get():
