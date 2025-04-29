@@ -1,11 +1,28 @@
 import pygame
 import copy
-from reversi.constants import BLACK, GREEN, ROWS, SQUARE_SIZE, WIDTH, HEIGHT, WHITE, COLS,BLUE
+from reversi.constants import BLACK, GREEN, ROWS, SQUARE_SIZE, WIDTH, HEIGHT, WHITE, COLS
 from reversi.piece import Piece
 
 # class board defines a board for a reversi game
 # we could have created a generic board and in a different class used it for the game.
 # choose this way to keep number of files minimal for the assignment.
+
+def is_corner(row, col):
+    corners =[(0, 0), (0, COLS - 1), (ROWS - 1, 0), (ROWS - 1, COLS - 1)]
+    move = row, col
+    if move in corners:
+        return True
+    else:
+        return False
+
+
+
+def is_wall(row, col):
+    if row == 0 or row == ROWS -1 or col == 0 or col == COLS-1:
+        return True
+    else:
+        return False
+
 class Board:
     moves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
     def __init__(self):
@@ -78,7 +95,7 @@ class Board:
 
 
     # had a bit of problem since im not using True vs False
-    # so I cant use !self.turn , i keep using the opponent variable instead
+    # so I cant use !self.turn , I keep using the opponent variable instead
     def get_opponent(self):
         return BLACK if self.turn == WHITE else WHITE
 
@@ -134,14 +151,14 @@ class Board:
     def flip_turn(self):
         self.turn = BLACK if self.turn == WHITE else WHITE
 
-    def game_over(self):
-        next_moves = self.next_moves()
-        if len(next_moves) == 0:
-            self.flip_turn()
-            next_moves = self.next_moves()
+
 
     def heuristic(self, row, col):
-        pieces_flipped = 0
+        heuristic = 0
+        if is_corner(row, col): # give a good score to a corner piece
+            heuristic += 8
+        elif is_wall(row,col):
+            heuristic += 8
         opponent = self.get_opponent()
         # check in all directions which disks this move flips.
         for row_move, col_move in self.moves:
@@ -150,15 +167,15 @@ class Board:
             while row_check in range(ROWS) and col_check in range(COLS):
                 piece = self.board[row_check][col_check]
                 if piece == 0:  # empty square "breaks" the line.
-
                     break
                 elif piece.colour == opponent:
                     flips += 1
                     row_check += row_move
                     col_check += col_move
                 elif piece.colour == self.turn:  # this direction closes a line!
-                    pieces_flipped += flips
+                    heuristic += flips
                     break
                 else:  # shouldn't get here
                     break
-        return pieces_flipped
+        return heuristic
+
