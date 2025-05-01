@@ -141,99 +141,61 @@ class Board:
 
 
 # a bunch of different heuristics that I tried and pitted against each other.
-# ultimately heuristic2 turned out to be the strongest.
-    def heuristic(self, row, col):
+# ultimately board_heuristic turned out to be the strongest.
+    def heuristic_with_inside(self, turn):
         heuristic = 0
-        if is_corner(row, col): # give a good score to a corner piece
-            heuristic += 25
-        elif dangerous_square(row, col):
-            heuristic -= 15
-        elif is_wall(row,col):
-            heuristic += 10
-        elif is_inside(row, col):
-            heuristic += 2
-        opponent = self.get_opponent()
-        # check in all directions which disks this move flips.
-        for row_move, col_move in self.moves:
-            flips = 0
-            row_check, col_check = row + row_move, col + col_move  # check the square in move direction
-            while row_check in range(ROWS) and col_check in range(COLS):
-                piece = self.board[row_check][col_check]
-                if piece == 0:  # empty square "breaks" the line.
-                    break
-                elif piece.colour == opponent:
-                    flips += 1
-                    row_check += row_move
-                    col_check += col_move
-                elif piece.colour == self.turn:  # this direction closes a line!
-                    heuristic += flips
-                    break
-                else:  # shouldn't get here
-                    break
+        for row in range(ROWS):
+            for col in range(COLS):
+                if self.board[row][col] == 0:
+                    continue
+                sign = 1 if self.board[row][col].colour == turn else -1
+                if is_corner(row, col):
+                    heuristic += sign * 50
+                elif dangerous_square(row, col,self.board):
+                    heuristic += sign * (-25)
+                elif is_wall(row, col):
+                    heuristic += sign * 10
+                elif is_inside(row,col):
+                    heuristic += sign * 2
+                else:
+                    heuristic += sign * 1
         return heuristic
-    def heuristic_weak(self, row, col):
-        heuristic = 0
-        opponent = self.get_opponent()
-        # check in all directions which disks this move flips.
-        for row_move, col_move in self.moves:
-            flips = 0
-            row_check, col_check = row + row_move, col + col_move  # check the square in move direction
-            while row_check in range(ROWS) and col_check in range(COLS):
-                piece = self.board[row_check][col_check]
-                if piece == 0:  # empty square "breaks" the line.
-                    break
-                elif piece.colour == opponent:
-                    flips += 1
-                    row_check += row_move
-                    col_check += col_move
-                elif piece.colour == self.turn:  # this direction closes a line!
-                    heuristic += flips
-                    break
-                else:  # shouldn't get here
-                    break
-        return heuristic
-    def mobility_heuristic(self, row, col):
-        temp_board = self.copy()
-        temp_board.make_move(row,col)# simulate taking the move
-        return len(temp_board.next_moves())
 
-
-    def combined_heuristic(self, row, col):
-        heuristic = self.heuristic(row, col) - self.mobility_heuristic(row, col)
-        if dangerous_square(row, col):
-            heuristic -= 5
-        return heuristic if heuristic > 0 else 0
-
-    def changing_heuristic(self, row, col):
-        if self.turns_played < TOTAL_PLYS * 0.7:
-            return self.heuristic(row,col)
+    def heuristic_weak(self,turn):
+        if turn == WHITE:
+            return self.white_pieces - self.black_pieces
         else:
-            return self.heuristic_weak(row,col)
+            return self.black_pieces - self.white_pieces
 
-    def heuristic2(self, row, col):
+
+
+    # we are looking after turn is made
+    # how many moves does oyr opponent have?
+    # we want to  minimize it
+    def mobility_heuristic(self):
+        return  len(self.next_moves())
+
+
+    def changing_heuristic(self, turn):
+        if self.turns_played < TOTAL_PLYS * 0.7:
+            return self.board_heuristic(turn)
+        else:
+            # focus on pieces in the end game
+            return self.heuristic_weak(turn)
+
+    def board_heuristic(self,turn):
         heuristic = 0
-        if is_corner(row, col):  # give a good score to a corner piece
-            heuristic += 25
-        elif dangerous_square(row, col):
-            heuristic -= 15
-        elif is_wall(row, col):
-            heuristic += 10
-        opponent = self.get_opponent()
-        # check in all directions which disks this move flips.
-        for row_move, col_move in self.moves:
-            flips = 0
-            row_check, col_check = row + row_move, col + col_move  # check the square in move direction
-            while row_check in range(ROWS) and col_check in range(COLS):
-                piece = self.board[row_check][col_check]
-                if piece == 0:  # empty square "breaks" the line.
-                    break
-                elif piece.colour == opponent:
-                    flips += 1
-                    row_check += row_move
-                    col_check += col_move
-                elif piece.colour == self.turn:  # this direction closes a line!
-                    heuristic += flips
-                    break
-                else:  # shouldn't get here
-                    break
+        for row in range(ROWS):
+            for col in range(COLS):
+                if self.board[row][col] == 0:
+                    continue
+                sign = 1 if self.board[row][col].colour == turn else -1
+                if is_corner(row,col):
+                    heuristic += sign * 50
+                elif dangerous_square(row, col,self.board):
+                    heuristic += sign * (-15)
+                elif is_wall(row, col):
+                    heuristic += sign * 10
+                else:
+                    heuristic += sign * 1
         return heuristic

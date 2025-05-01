@@ -1,4 +1,4 @@
-from constants import ROWS, COLS
+from reversi.constants import ROWS, COLS
 def is_corner(row, col):
     corners = [(0, 0), (0, COLS - 1), (ROWS - 1, 0), (ROWS - 1, COLS - 1)]
     move = row, col
@@ -15,14 +15,32 @@ def is_wall(row, col):
         return False
 
 
-def dangerous_square(row, col):
-    dangerous_squares = [(0, 1), (1, 0), (1, 1),
-                         (0, COLS - 2), (1, COLS - 1), (1, COLS - 2),
-                         (ROWS - 1, 0), (ROWS - 1, 1), (ROWS - 2, 1),
-                         (ROWS - 2, COLS - 2), (ROWS - 1, COLS - 2), (ROWS - 2, COLS - 1)]
+def dangerous_square(row, col,board):
+    dangerous_squares = {
+        # top left
+        (0, 1): (0, 0),
+        (1, 0): (0, 0),
+        (1, 1): (0, 0),
+        # top right
+        (0, COLS - 2): (0, COLS - 1),
+        (1, COLS - 2): (0, COLS - 1),
+        (1, COLS - 1): (0, COLS - 1),
+
+        # bottom left
+        (ROWS - 2, 0): (ROWS - 1, 0),
+        (ROWS - 2, 1): (ROWS - 1, 0),
+        (ROWS - 1, 1): (ROWS - 1, 0),
+
+        # bottom right
+        (ROWS - 2, COLS - 2): (ROWS - 1, COLS - 1),
+        (ROWS - 2, COLS - 1): (ROWS - 1, COLS - 1),
+        (ROWS - 1, COLS - 2): (ROWS - 1, COLS - 1),
+    }
+
     move = row, col
     if move in dangerous_squares:
-        return True
+        corner_row, corner_col = dangerous_squares.get(move)
+        return board[corner_row][corner_col] == 0
     else:
         return False
 

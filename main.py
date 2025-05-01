@@ -1,5 +1,5 @@
+from time import sleep
 import pygame
-import time
 from reversi.constants import WIDTH, HEIGHT, SQUARE_SIZE, BLACK, WHITE
 from reversi.board import Board
 
@@ -31,25 +31,19 @@ def main():
                 opponent_stuck = True
                 board.flip_turn()
                 continue
-        best_move = next_moves[0]
-        row, col = best_move
+        best_move = None
+        best_move_h = float('-inf')
         if board.turn == WHITE:
-            best_move_h = board.heuristic2(row, col)
             for move in next_moves:
                 row, col = move
-                if board.heuristic2(row, col) > best_move_h:
+                temp_board = board.copy()
+                temp_board.make_move(row, col)
+                if temp_board.board_heuristic(WHITE) > best_move_h:
                     best_move = move
-                    best_move_h = board.heuristic2(row, col)
-        else:
-            best_move_h = board.heuristic(row, col)
-            for move in next_moves:
-                row, col = move
-                if board.heuristic(row, col) > best_move_h:
-                    best_move = move
-                    best_move_h = board.heuristic(row, col)
-        row, col = best_move
-        time.sleep(1)
-        board.make_move(row, col)
+                    best_move_h = temp_board.board_heuristic(WHITE)
+            row, col = best_move
+            sleep(1)
+            board.make_move(row, col)
 
 
 
