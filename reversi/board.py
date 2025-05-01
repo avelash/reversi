@@ -1,28 +1,16 @@
+
 import pygame
 import copy
-from reversi.constants import BLACK, GREEN, ROWS, SQUARE_SIZE, WIDTH, HEIGHT, WHITE, COLS
+from reversi.constants import BLACK, GREEN, ROWS, SQUARE_SIZE, WIDTH, HEIGHT, WHITE, COLS, TOTAL_PLYS
+from reversi.helpers import is_corner, dangerous_square, is_wall, is_inside
 from reversi.piece import Piece
+
+
+
 
 # class board defines a board for a reversi game
 # we could have created a generic board and in a different class used it for the game.
 # choose this way to keep number of files minimal for the assignment.
-
-def is_corner(row, col):
-    corners =[(0, 0), (0, COLS - 1), (ROWS - 1, 0), (ROWS - 1, COLS - 1)]
-    move = row, col
-    if move in corners:
-        return True
-    else:
-        return False
-
-
-
-def is_wall(row, col):
-    if row == 0 or row == ROWS -1 or col == 0 or col == COLS-1:
-        return True
-    else:
-        return False
-
 class Board:
     moves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
     def __init__(self):
@@ -152,13 +140,18 @@ class Board:
         self.turn = BLACK if self.turn == WHITE else WHITE
 
 
-
+# a bunch of different heuristics that I tried and pitted against each other.
+# ultimately heuristic2 turned out to be the strongest.
     def heuristic(self, row, col):
         heuristic = 0
         if is_corner(row, col): # give a good score to a corner piece
-            heuristic += 8
+            heuristic += 25
+        elif dangerous_square(row, col):
+            heuristic -= 15
         elif is_wall(row,col):
-            heuristic += 8
+            heuristic += 10
+        elif is_inside(row, col):
+            heuristic += 2
         opponent = self.get_opponent()
         # check in all directions which disks this move flips.
         for row_move, col_move in self.moves:
@@ -178,4 +171,69 @@ class Board:
                 else:  # shouldn't get here
                     break
         return heuristic
+    def heuristic_weak(self, row, col):
+        heuristic = 0
+        opponent = self.get_opponent()
+        # check in all directions which disks this move flips.
+        for row_move, col_move in self.moves:
+            flips = 0
+            row_check, col_check = row + row_move, col + col_move  # check the square in move direction
+            while row_check in range(ROWS) and col_check in range(COLS):
+                piece = self.board[row_check][col_check]
+                if piece == 0:  # empty square "breaks" the line.
+                    break
+                elif piece.colour == opponent:
+                    flips += 1
+                    row_check += row_move
+                    col_check += col_move
+                elif piece.colour == self.turn:  # this direction closes a line!
+                    heuristic += flips
+                    break
+                else:  # shouldn't get here
+                    break
+        return heuristic
+    def mobility_heuristic(self, row, col):
+        temp_board = self.copy()
+        temp_board.make_move(row,col)# simulate taking the move
+        return len(temp_board.next_moves())
 
+
+    def combined_heuristic(self, row, col):
+        heuristic = self.heuristic(row, col) - self.mobility_heuristic(row, col)
+        if dangerous_square(row, col):
+            heuristic -= 5
+        return heuristic if heuristic > 0 else 0
+
+    def changing_heuristic(self, row, col):
+        if self.turns_played < TOTAL_PLYS * 0.7:
+            return self.heuristic(row,col)
+        else:
+            return self.heuristic_weak(row,col)
+
+    def heuristic2(self, row, col):
+        heuristic = 0
+        if is_corner(row, col):  # give a good score to a corner piece
+            heuristic += 25
+        elif dangerous_square(row, col):
+            heuristic -= 15
+        elif is_wall(row, col):
+            heuristic += 10
+        opponent = self.get_opponent()
+        # check in all directions which disks this move flips.
+        for row_move, col_move in self.moves:
+            flips = 0
+            row_check, col_check = row + row_move, col + col_move  # check the square in move direction
+            while row_check in range(ROWS) and col_check in range(COLS):
+                piece = self.board[row_check][col_check]
+                if piece == 0:  # empty square "breaks" the line.
+                    break
+                elif piece.colour == opponent:
+                    flips += 1
+                    row_check += row_move
+                    col_check += col_move
+                elif piece.colour == self.turn:  # this direction closes a line!
+                    heuristic += flips
+                    break
+                else:  # shouldn't get here
+                    break
+        return heuristic

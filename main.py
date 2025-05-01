@@ -1,6 +1,6 @@
 import pygame
 import time
-from reversi.constants import WIDTH, HEIGHT, SQUARE_SIZE, BLACK
+from reversi.constants import WIDTH, HEIGHT, SQUARE_SIZE, BLACK, WHITE
 from reversi.board import Board
 
 FPS = 60
@@ -19,34 +19,40 @@ def main():
     run = True
     clock = pygame.time.Clock()
     board = Board()
-    not_printed = True
-
+    opponent_stuck = False
 
 
     while run:
         next_moves = board.next_moves()
         if len(next_moves) == 0:
-            print("black out of moves")
-            break
+            if opponent_stuck:
+                break
+            else:
+                opponent_stuck = True
+                board.flip_turn()
+                continue
         best_move = next_moves[0]
         row, col = best_move
-        best_move_h = board.heuristic(row, col)
-        for move in next_moves:
-            row, col = move
-            if board.heuristic(row, col) > best_move_h:
-                best_move = move
-                best_move_h = board.heuristic(row,col)
-
-        if board.turn == BLACK:
-            row, col = best_move
-            time.sleep(3)
-            board.make_move(row, col)
-            not_printed = True
-
+        if board.turn == WHITE:
+            best_move_h = board.heuristic2(row, col)
+            for move in next_moves:
+                row, col = move
+                if board.heuristic2(row, col) > best_move_h:
+                    best_move = move
+                    best_move_h = board.heuristic2(row, col)
         else:
-            if not_printed:
-                print(f"best moves would flip: {best_move_h} disks")
-                not_printed = False
+            best_move_h = board.heuristic(row, col)
+            for move in next_moves:
+                row, col = move
+                if board.heuristic(row, col) > best_move_h:
+                    best_move = move
+                    best_move_h = board.heuristic(row, col)
+        row, col = best_move
+        time.sleep(1)
+        board.make_move(row, col)
+
+
+
 
         clock.tick(FPS)
         for event in pygame.event.get():

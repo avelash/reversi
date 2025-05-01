@@ -2,6 +2,7 @@ import pygame
 WIDTH,HEIGHT = 800, 800
 ROWS, COLS = 8, 8
 SQUARE_SIZE = WIDTH//COLS
+TOTAL_PLYS = ROWS * COLS - 4
 
 #rgb
 GREEN = (0, 128, 0)
