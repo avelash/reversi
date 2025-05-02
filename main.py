@@ -1,6 +1,6 @@
 from time import sleep
 import pygame
-from reversi.constants import WIDTH, HEIGHT, SQUARE_SIZE, BLACK, WHITE
+from reversi.constants import WIDTH, HEIGHT, SQUARE_SIZE, BLACK, WHITE, MAX_SCORE
 from reversi.board import Board
 
 FPS = 60
@@ -16,6 +16,7 @@ def get_row_and_col_from_pos(pos):
 
 
 def main():
+    print(MAX_SCORE)
     run = True
     clock = pygame.time.Clock()
     board = Board()
@@ -42,6 +43,7 @@ def main():
                     best_move = move
                     best_move_h = temp_board.board_heuristic(WHITE)
             row, col = best_move
+            print(best_move_h)
             sleep(1)
             board.make_move(row, col)
 

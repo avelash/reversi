@@ -1,7 +1,7 @@
 
 import pygame
 import copy
-from reversi.constants import BLACK, GREEN, ROWS, SQUARE_SIZE, WIDTH, HEIGHT, WHITE, COLS, TOTAL_PLYS
+from reversi.constants import *
 from reversi.helpers import is_corner, dangerous_square, is_wall, is_inside
 from reversi.piece import Piece
 
@@ -150,13 +150,13 @@ class Board:
                     continue
                 sign = 1 if self.board[row][col].colour == turn else -1
                 if is_corner(row, col):
-                    heuristic += sign * 50
+                    heuristic += sign * CORNER_WEIGHT
                 elif dangerous_square(row, col,self.board):
-                    heuristic += sign * (-25)
+                    heuristic += sign * DANGEROUS_WEIGHT
                 elif is_wall(row, col):
-                    heuristic += sign * 10
+                    heuristic += sign * WALL_WEIGHT
                 elif is_inside(row,col):
-                    heuristic += sign * 2
+                    heuristic += sign * INSIDE_WEIGHT
                 else:
                     heuristic += sign * 1
         return heuristic
@@ -191,11 +191,12 @@ class Board:
                     continue
                 sign = 1 if self.board[row][col].colour == turn else -1
                 if is_corner(row,col):
-                    heuristic += sign * 50
+                    heuristic += sign * CORNER_WEIGHT
                 elif dangerous_square(row, col,self.board):
-                    heuristic += sign * (-15)
+                    heuristic += sign * DANGEROUS_WEIGHT
                 elif is_wall(row, col):
-                    heuristic += sign * 10
+                    heuristic += sign * WALL_WEIGHT
                 else:
                     heuristic += sign * 1
-        return heuristic
+        normalized = (heuristic - MIN_SCORE)/ (MAX_SCORE-MIN_SCORE)
+        return normalized

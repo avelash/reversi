@@ -14,7 +14,7 @@ def is_wall(row, col):
     else:
         return False
 
-
+# a square is only dangerous if the corner is free
 def dangerous_square(row, col,board):
     dangerous_squares = {
         # top left
@@ -25,12 +25,10 @@ def dangerous_square(row, col,board):
         (0, COLS - 2): (0, COLS - 1),
         (1, COLS - 2): (0, COLS - 1),
         (1, COLS - 1): (0, COLS - 1),
-
         # bottom left
         (ROWS - 2, 0): (ROWS - 1, 0),
         (ROWS - 2, 1): (ROWS - 1, 0),
         (ROWS - 1, 1): (ROWS - 1, 0),
-
         # bottom right
         (ROWS - 2, COLS - 2): (ROWS - 1, COLS - 1),
         (ROWS - 2, COLS - 1): (ROWS - 1, COLS - 1),
