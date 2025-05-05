@@ -16,7 +16,6 @@ def get_row_and_col_from_pos(pos):
 
 
 def main():
-    print(MAX_SCORE)
     run = True
     clock = pygame.time.Clock()
     board = Board()

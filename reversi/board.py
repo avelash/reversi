@@ -200,3 +200,13 @@ class Board:
                     heuristic += sign * 1
         normalized = (heuristic - MIN_SCORE)/ (MAX_SCORE-MIN_SCORE)
         return normalized
+    def print_game_over(self):
+        print("End state:")
+        print(self)
+        print(f"Result: white->{self.white_pieces} black-> {self.black_pieces}")
+        if self.white_pieces > self.black_pieces:
+            print("white wins!")
+        elif self.black_pieces > self.white_pieces:
+            print("black wins!")
+        else:
+            print("DRAW!!")
