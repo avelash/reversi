@@ -200,6 +200,8 @@ class Board:
                     heuristic += sign * 1
         normalized = (heuristic - MIN_SCORE)/ (MAX_SCORE-MIN_SCORE)
         return normalized
+
+
     def print_game_over(self):
         print("End state:")
         print(self)

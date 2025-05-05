@@ -2,6 +2,7 @@ from time import sleep
 import pygame
 from reversi.constants import WIDTH, HEIGHT, SQUARE_SIZE, BLACK, WHITE, MAX_SCORE
 from reversi.board import Board
+from reversi.helpers import min_max_search
 
 FPS = 60
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -31,18 +32,9 @@ def main():
                 opponent_stuck = True
                 board.flip_turn()
                 continue
-        best_move = None
-        best_move_h = float('-inf')
         if board.turn == WHITE:
-            for move in next_moves:
-                row, col = move
-                temp_board = board.copy()
-                temp_board.make_move(row, col)
-                if temp_board.board_heuristic(WHITE) > best_move_h:
-                    best_move = move
-                    best_move_h = temp_board.board_heuristic(WHITE)
+            best_move = min_max_search(board,board.turn,3)
             row, col = best_move
-            print(best_move_h)
             sleep(1)
             board.make_move(row, col)
 
